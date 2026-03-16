@@ -156,7 +156,7 @@ function copyToClipboard(){
         text += `${users[i]}: ${colorMap[todayAssignment[i]]}\n`;
     }
     navigator.clipboard.writeText(text).then(()=>{
-        alert("Kopierat till urklipp!");
+        // alert("Kopierat till urklipp!");
     }).catch(err=>{
         alert("Kunde inte kopiera: "+err);
     });
