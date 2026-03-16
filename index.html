@@ -2,85 +2,141 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Jubb</title>
-
+<title>Jubb!</title>
 <style>
 body{
-font-family:Arial;
-text-align:center;
-margin-top:40px;
+    font-family: Arial;
+    text-align: center;
+    margin-top: 40px;
 }
-
 table{
-margin:auto;
-border-collapse:collapse;
+    margin: auto;
+    border-collapse: collapse;
 }
+td{
+    width: 200px; /* fixed width for all user cells */
+    height: 40px; 
+    border: 1px solid #ccc;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+}
+.green{ background-color: #04ac2b; }
+.blue{ background-color: #0066cc; }
+.red{ background-color: #ff2537; }
 
-td,th{
-border:1px solid #ccc;
-padding:10px 20px;
+/* Legend row */
+.legend td{
+    font-size: 12px;
+    height: 40px;
+    font-weight: normal;
+    color: #000;
+    padding: 0;
+    max-width: 200px; 
 }
+.legend-flex{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+.legend-item{
+    flex: 1;
+    text-align: center;
+}
+.red-text{ color: #ff2537; }
+.blue-text{ color: #0066cc; }
+.green-text{ color: #04ac2b; }
 </style>
-
 </head>
 <body>
 
-<h1>Jubb</h1>
+
 
 <table id="table">
-<tr>
-<th>Uppgifter</th>
-<th>TFL</th>
-</tr>
 </table>
 
 <script>
+// Users
+const users = ["Jonatan", "Jonas", "Michaela"];
+const colors = ["green", "red", "blue"];
 
-const users = ["Jonatan","Jonas","Michaela"];
-const tasks = ["Change","Incident","Övrigt"];
+// deterministic pseudo-random function
+function seededRandom(seed){
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
 
 // get day number since epoch
 function getDayNumber(){
-    return Math.floor(Date.now() / 86400000);
+    return Math.floor(Date.now() / (1000*60*60*24));
 }
 
-function generateAssignments(){
-
-    const day = getDayNumber();
-
-    let assignments = {};
-
-    for(let i=0;i<tasks.length;i++){
-
-        const userIndex = (i + day) % users.length;
-
-        assignments[tasks[i]] = users[userIndex];
+// shuffle colors deterministically
+function shuffleColors(seed){
+    let arr = [...colors];
+    for(let i=arr.length-1; i>0; i--){
+        seed++;
+        const j = Math.floor(seededRandom(seed)*(i+1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-
-    return assignments;
+    return arr;
 }
 
+// render table with legend
 function render(){
-
-    const assignments = generateAssignments();
     const table = document.getElementById("table");
+    table.innerHTML="";
 
-    for(const task in assignments){
+    // Legend row with flexbox
+    const legendRow = document.createElement("tr");
+    legendRow.className = "legend";
+    const legendCell = document.createElement("td");
 
-        const row=document.createElement("tr");
+    const flexContainer = document.createElement("div");
+    flexContainer.className = "legend-flex";
 
-        row.innerHTML=`
-        <td>${task}</td>
-        <td>${assignments[task]}</td>
-        `;
+    const redItem = document.createElement("div");
+    redItem.className = "legend-item red-text";
+    redItem.textContent = "Incident";
 
+    const blueItem = document.createElement("div");
+    blueItem.className = "legend-item blue-text";
+    blueItem.textContent = "Change";
+
+    const greenItem = document.createElement("div");
+    greenItem.className = "legend-item green-text";
+    greenItem.textContent = "Övrigt";
+
+    flexContainer.appendChild(redItem);
+    flexContainer.appendChild(blueItem);
+    flexContainer.appendChild(greenItem);
+    legendCell.appendChild(flexContainer);
+    legendRow.appendChild(legendCell);
+    table.appendChild(legendRow);
+
+    // generate daily assignment
+    const seed = getDayNumber();
+    const assignment = shuffleColors(seed);
+
+    // render user rows
+    for(let i=0;i<users.length;i++){
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.textContent = users[i];
+        cell.className = assignment[i];
+        row.appendChild(cell);
         table.appendChild(row);
     }
-
 }
 
+// initial render
 render();
 
+// auto-refresh every hour
+setInterval(render, 1000*60*60);
 </script>
 
 </body>

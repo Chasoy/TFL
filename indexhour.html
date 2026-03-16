@@ -3,83 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <title>Jubb!</title>
-
 <style>
 body{
-    font-family:Arial;
-    text-align:center;
-    margin-top:40px;
+    font-family: Arial;
+    text-align: center;
+    margin-top: 40px;
 }
-
 table{
-    margin:auto;
-    border-collapse:collapse;
+    margin: auto;
+    border-collapse: collapse;
 }
-
-td,th{
-    border:1px solid #ccc;
-    padding:10px 20px;
+td{
+    width: 200px;
+    height: 50px;
+    border: 1px solid #ccc;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 18px;
 }
+.green{ background-color: #04ac2b; }
+.blue{ background-color: #0066cc; }
+.red{ background-color: #ff2537; }
 </style>
-
 </head>
 <body>
 
 <h1>Jubb</h1>
 
-<table id="table">
-<tr>
-<th>Uppgift</th>
-<th>TFL</th>
-</tr>
-</table>
+<table id="table"></table>
 
 <script>
-// Users and tasks
-const users = ["Jonatan","Jonas","Michaela"];
-const tasks = ["Change","Incident","Övrigt"];
+// Users
+const users = ["Jonatan", "Jonas", "Michaela"];
+// Colors
+const colors = ["green", "red", "blue"];
+
+// deterministic pseudo-random function based on minute
+function seededRandom(seed){
+    let x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+}
 
 // get minute number since epoch
 function getMinuteNumber(){
-    return Math.floor(Date.now() / (1000 * 60));
+    return Math.floor(Date.now() / (1000*60));
 }
 
-// deterministic assignments based on minute
-function generateAssignments(){
-    const minute = getMinuteNumber();
-    let assignments = {};
-
-    for(let i=0; i<tasks.length; i++){
-        const userIndex = (i + minute) % users.length;
-        assignments[tasks[i]] = users[userIndex];
+// shuffle colors deterministically
+function shuffleColors(seed){
+    let arr = [...colors];
+    for(let i=arr.length-1; i>0; i--){
+        seed++;
+        const j = Math.floor(seededRandom(seed)*(i+1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-
-    return assignments;
+    return arr;
 }
 
 // render table
 function render(){
-    const assignments = generateAssignments();
     const table = document.getElementById("table");
+    table.innerHTML="";
 
-    // clear old rows
-    table.querySelectorAll("tr:not(:first-child)").forEach(tr => tr.remove());
+    // use current minute as seed
+    const seed = getMinuteNumber();
+    const assignment = shuffleColors(seed);
 
-    for(const task in assignments){
+    for(let i=0;i<users.length;i++){
         const row = document.createElement("tr");
-        row.innerHTML = `
-        <td>${task}</td>
-        <td>${assignments[task]}</td>
-        `;
+        const cell = document.createElement("td");
+        cell.textContent = users[i];
+        cell.className = assignment[i];
+        row.appendChild(cell);
         table.appendChild(row);
     }
 }
 
 // initial render
 render();
-
 // refresh every minute
-setInterval(render, 1000 * 60);
+setInterval(render, 1000*60);
 
 </script>
 
