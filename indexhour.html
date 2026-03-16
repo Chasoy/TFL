@@ -35,23 +35,22 @@ td,th{
 </table>
 
 <script>
-
 // Users and tasks
 const users = ["Jonatan","Jonas","Michaela"];
 const tasks = ["Change","Incident","Övrigt"];
 
-// get hour number since epoch
-function getHourNumber(){
-    return Math.floor(Date.now() / (1000 * 60 * 60));
+// get minute number since epoch
+function getMinuteNumber(){
+    return Math.floor(Date.now() / (1000 * 60));
 }
 
-// deterministic assignments based on hour
+// deterministic assignments based on minute
 function generateAssignments(){
-    const hour = getHourNumber();
+    const minute = getMinuteNumber();
     let assignments = {};
 
     for(let i=0; i<tasks.length; i++){
-        const userIndex = (i + hour) % users.length;
+        const userIndex = (i + minute) % users.length;
         assignments[tasks[i]] = users[userIndex];
     }
 
@@ -79,10 +78,8 @@ function render(){
 // initial render
 render();
 
-// optional: auto-refresh every hour on the hour
-setInterval(() => {
-    render();
-}, 1000 * 60 * 60);
+// refresh every minute
+setInterval(render, 1000 * 60);
 
 </script>
 
