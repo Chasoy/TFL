@@ -79,9 +79,14 @@ const colorMap = {
 };
 
 // deterministic pseudo-random function
-function seededRandom(seed){
-    let x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
+function seededRandom(seed) {
+    let x = seed;
+    x = (x ^ 61) ^ (x >>> 16);
+    x = x + (x << 3);
+    x = x ^ (x >>> 4);
+    x = x * 0x27d4eb2d;
+    x = x ^ (x >>> 15);
+    return (x >>> 0) / 4294967296;
 }
 
 // get day number since epoch
@@ -133,7 +138,8 @@ function render(){
     table.appendChild(legendRow);
 
     // generate daily assignment
-    const seed = getDayNumber();
+    const offset = 0; // look 0 days ahead
+    const seed = (getDayNumber() + offset) * 12345;
     const assignment = shuffleColors(seed);
     todayAssignment = assignment; // save for copy button
 
